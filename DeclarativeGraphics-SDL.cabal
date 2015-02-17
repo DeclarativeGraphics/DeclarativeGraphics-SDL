@@ -5,8 +5,8 @@ name:                DeclarativeGraphics-SDL
 version:             0.1.0.0
 -- synopsis:            
 -- description:         
-license:             PublicDomain
-license-file:        LICENSE
+license:             AllRightReserved
+-- license-file:        LICENSE
 author:              Philipp Krüger
 maintainer:          matheus.dev@gmail.com
 -- copyright:           
@@ -19,6 +19,7 @@ library
   -- exposed-modules:     
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8
+  build-depends:       base, sdl2, cairo, cpu, containers,
+                       DeclarativeGraphics, DeclarativeGraphics-Cairo
   -- hs-source-dirs:      
   default-language:    Haskell2010
