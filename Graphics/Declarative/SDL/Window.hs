@@ -43,7 +43,7 @@ initializeSDL flags = do
 
 createWindow :: String -> CInt -> CInt -> IO (Risky SDL.Window)
 createWindow windowTitle windowWidth windowHeight = withCAString windowTitle $ \title -> do
-    window <- SDL.createWindow title SDL.SDL_WINDOWPOS_UNDEFINED SDL.SDL_WINDOWPOS_UNDEFINED windowWidth windowHeight SDL.SDL_WINDOW_SHOWN
+    window <- SDL.createWindow title SDL.SDL_WINDOWPOS_UNDEFINED SDL.SDL_WINDOWPOS_UNDEFINED windowWidth windowHeight (SDL.SDL_WINDOW_SHOWN .|. SDL.SDL_WINDOW_RESIZABLE)
     return $ if window == nullPtr then Left "Window could not be created!" else Right window
 
 throwSDLError :: String -> IO a
@@ -56,20 +56,27 @@ applyToPointer operation pointer = liftM operation $ peek pointer
 
 sdlEventLoop :: Int -> state -> (Input -> state -> IO (Form, state)) -> SDL.Window -> SDL.Renderer -> IO ()
 sdlEventLoop runsPerSec initState handleInput win rend = fmap (const ()) $ scheduledLoop runsPerSec initState $ \currentState -> do
-    (doResume, input) <- pollSDLEvent
-    afterInputState <- case input of
-      Just event -> fmap snd $ handleInput event currentState
-      Nothing    -> return currentState
+    (doResume, afterInputState) <- consumeEvents (True, currentState) handleInput
     (form, afterTickState) <- handleInput Tick afterInputState
     renderForm rend win form
     return (doResume, afterTickState)
+
+consumeEvents :: (Bool, state) -> (Input -> state -> IO (Form, state)) -> IO (Bool, state)
+consumeEvents (didResume, currentState) handleInput = do
+    (doResume, input) <- pollSDLEvent
+    case input of
+      Just event -> do
+        print event
+        (_, newState) <- handleInput event currentState
+        consumeEvents (didResume && doResume, newState) handleInput
+      Nothing -> return (didResume && doResume, currentState)
 
 pollSDLEvent :: IO (Bool, Maybe Input)
 pollSDLEvent = alloca $ \eventptr -> do
     status <- SDL.pollEvent eventptr
     if status == 1 then do
       event <- peek eventptr
-      print event
+      --print event
       case event of
         (SDL.QuitEvent _ _) -> return (False, Nothing)
         e -> return (True, fromSDLEvent e)
