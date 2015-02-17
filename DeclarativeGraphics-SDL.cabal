@@ -16,7 +16,9 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  -- exposed-modules:     
+  exposed-modules:     Graphics.Declarative.SDL.Window, Graphics.Declarative.SDL.Input,
+                       Graphics.Declarative.SDL.KeyboardInput, Graphics.Declarative.SDL.Keys,
+                       Graphics.Declarative.SDL.Loop
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base, sdl2, cairo, cpu, containers,
