@@ -8,9 +8,9 @@ import Control.Applicative
 
 import Graphics.Declarative.SDL.Keys
 
-data KeyInput = KeyPress [Modifier] Key | KeyRelease [Modifier] Key
+data KeyInput = KeyPress [Modifier] Key | KeyRelease [Modifier] Key deriving (Show, Eq)
 
-data Modifier = Shift | Ctrl
+data Modifier = Shift | Ctrl deriving (Show, Eq)
 
 fromSDLKeyEvent :: Word32 -> SDL.Keysym -> Maybe KeyInput
 fromSDLKeyEvent 768 sym = KeyPress [] <$> (fromKeycode $ SDL.keysymKeycode sym)

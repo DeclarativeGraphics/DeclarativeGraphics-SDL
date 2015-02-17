@@ -13,7 +13,7 @@ ioLoop loopFunc initialState = do
     else return nextIn
 
 scheduledLoopStateless :: Int -> IO Bool -> IO ()
-scheduledLoopStateless runsPerSec action = scheduledLoop runsPerSec igAction ()
+scheduledLoopStateless runsPerSec action = scheduledLoop runsPerSec () igAction
   where igAction () = fmap (\shouldContinue -> (shouldContinue, ())) action
 
 scheduledLoop :: Int -> s -> (s -> IO (Bool, s)) -> IO s

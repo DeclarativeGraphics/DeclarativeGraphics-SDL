@@ -239,6 +239,7 @@ data Key
   | KBDIllumUp
   | Eject
   | Sleep
+  deriving (Show, Eq)
 
 fromKeycode :: Int32 -> Maybe Key
 fromKeycode 0 = Just Unkown
