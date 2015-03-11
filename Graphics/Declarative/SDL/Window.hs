@@ -43,7 +43,7 @@ initializeSDL flags = do
 
 createWindow :: String -> CInt -> CInt -> IO (Risky SDL.Window)
 createWindow windowTitle windowWidth windowHeight = withCAString windowTitle $ \title -> do
-    window <- SDL.createWindow title SDL.SDL_WINDOWPOS_UNDEFINED SDL.SDL_WINDOWPOS_UNDEFINED windowWidth windowHeight (SDL.SDL_WINDOW_SHOWN .|. SDL.SDL_WINDOW_RESIZABLE)
+    window <- SDL.createWindow title SDL.SDL_WINDOWPOS_UNDEFINED SDL.SDL_WINDOWPOS_UNDEFINED windowWidth windowHeight (SDL.SDL_WINDOW_ALLOW_HIGHDPI .|. SDL.SDL_WINDOW_SHOWN .|. SDL.SDL_WINDOW_RESIZABLE)
     return $ if window == nullPtr then Left "Window could not be created!" else Right window
 
 throwSDLError :: String -> IO a
@@ -53,6 +53,24 @@ throwSDLError message = do
 
 applyToPointer :: (Storable a) => (a -> b) -> Ptr a -> IO b
 applyToPointer operation pointer = liftM operation $ peek pointer
+
+sdlBlockingEventLoop :: state -> (Input -> state -> IO (Form, state)) -> SDL.Window -> SDL.Renderer -> IO ()
+sdlBlockingEventLoop state handleInput win rend = 
+  void $ flip ioLoop state $ \ state ->
+    alloca $ \ eventptr -> do
+      status <- SDL.waitEvent eventptr
+      if status == 1 then do
+        sdlEvent <- peek eventptr
+        case sdlEvent of
+          SDL.QuitEvent _ _ -> return (False, state)
+          e                 -> case fromSDLEvent e of
+            Just event -> do
+              (form, newState) <- handleInput event state
+              renderForm rend win form
+              return (True, newState)
+            Nothing -> return (True, state)
+      else return (True, state)
+
 
 sdlEventLoop :: Int -> state -> (Input -> state -> IO (Form, state)) -> SDL.Window -> SDL.Renderer -> IO ()
 sdlEventLoop runsPerSec initState handleInput win rend = fmap (const ()) $ scheduledLoop runsPerSec initState $ \currentState -> do
@@ -74,6 +92,17 @@ consumeEvents (didResume, currentState) handleInput = do
 pollSDLEvent :: IO (Bool, Maybe Input)
 pollSDLEvent = alloca $ \eventptr -> do
     status <- SDL.pollEvent eventptr
+    if status == 1 then do
+      event <- peek eventptr
+      --print event
+      case event of
+        (SDL.QuitEvent _ _) -> return (False, Nothing)
+        e -> return (True, fromSDLEvent e)
+    else return (True, Nothing)
+
+waitSDLEvent :: IO (Bool, Maybe Input)
+waitSDLEvent = alloca $ \eventptr -> do
+    status <- SDL.waitEvent eventptr
     if status == 1 then do
       event <- peek eventptr
       --print event
