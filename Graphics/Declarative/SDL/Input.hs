@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternSynonyms #-}
 module Graphics.Declarative.SDL.Input where
 
 import Control.Applicative
@@ -12,10 +13,15 @@ data Input
   | Tick
   deriving (Show, Eq)
 
-data MouseInput = MouseMove (Double, Double) deriving (Show, Eq)
+data MouseInput = MouseMove (Double, Double)
+                | MousePress Int
+                | MouseRelease Int
+                deriving (Show, Eq)
 
 fromSDLEvent :: SDL.Event -> Maybe Input
 fromSDLEvent (SDL.KeyboardEvent evType _ _ _ _ keysym) = KeyInput <$> fromSDLKeyEvent evType keysym
 fromSDLEvent (SDL.MouseMotionEvent _ _ _ _ _ x y _ _) = Just $ MouseInput $ MouseMove (fromIntegral x, fromIntegral y)
+fromSDLEvent (SDL.MouseButtonEvent _ _ _ _ button SDL.SDL_KEYUP _ _ _) = Just $ MouseInput $ MousePress $ fromIntegral button
+fromSDLEvent (SDL.MouseButtonEvent _ _ _ _ button SDL.SDL_KEYDOWN _ _ _) = Just $ MouseInput $ MouseRelease $ fromIntegral button
 fromSDLEvent (SDL.WindowEvent _ _ _ 5 w h) = Just $ Resize (fromIntegral w, fromIntegral h)
 fromSDLEvent _ = Nothing
