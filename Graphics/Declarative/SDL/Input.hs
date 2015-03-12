@@ -23,5 +23,5 @@ fromSDLEvent (SDL.KeyboardEvent evType _ _ _ _ keysym) = KeyInput <$> fromSDLKey
 fromSDLEvent (SDL.MouseMotionEvent _ _ _ _ _ x y _ _) = Just $ MouseInput $ MouseMove (fromIntegral x, fromIntegral y)
 fromSDLEvent (SDL.MouseButtonEvent SDL.SDL_MOUSEBUTTONDOWN _ _ _ button _ _ _ _) = Just $ MouseInput $ MousePress $ fromIntegral button
 fromSDLEvent (SDL.MouseButtonEvent SDL.SDL_MOUSEBUTTONUP _ _ _ button _ _ _ _) = Just $ MouseInput $ MouseRelease $ fromIntegral button
-fromSDLEvent (SDL.WindowEvent _ _ _ 5 w h) = Just $ Resize (fromIntegral w, fromIntegral h)
+fromSDLEvent (SDL.WindowEvent _ _ _ SDL.SDL_WINDOWEVENT_RESIZED w h) = Just $ Resize (fromIntegral w, fromIntegral h)
 fromSDLEvent _ = Nothing
