@@ -77,5 +77,7 @@ resizeTexture rend texture = do
 cairoClear :: Cairo.Render ()
 cairoClear = setSourceColor (1, 1, 1) >> Cairo.paint
 
+type RGB = (Double, Double, Double)
+
 setSourceColor :: RGB -> Cairo.Render ()
 setSourceColor (r,g,b) = Cairo.setSourceRGB r g b
