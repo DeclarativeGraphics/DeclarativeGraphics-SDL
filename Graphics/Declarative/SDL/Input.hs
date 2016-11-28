@@ -43,9 +43,9 @@ data KeyInput = KeyPress Key
 type TimeInMs = Word32
 
 waitEventTimeout :: TimeInMs -> IO (Maybe Input)
-waitEventTimeout timeout =
+waitEventTimeout timeout = do
   event <- SDL.waitEventTimeout (fromIntegral timeout)
-  return (fmap fromSDLEvent event)
+  return (fromSDLEvent =<< event)
 
 ticks :: IO TimeInMs
 ticks = SDL.ticks
