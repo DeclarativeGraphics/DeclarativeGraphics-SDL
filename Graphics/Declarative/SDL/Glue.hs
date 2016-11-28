@@ -73,3 +73,9 @@ resizeTexture rend texture = do
   (SDL.TextureInfo format access width height) <- SDL.queryTexture texture
   SDL.destroyTexture texture
   SDL.createTexture rend format access $ V2 (fromIntegral width) (fromIntegral height)
+
+cairoClear :: Cairo.Render ()
+cairoClear = setSourceColor (1, 1, 1) >> Cairo.paint
+
+setSourceColor :: RGB -> Cairo.Render ()
+setSourceColor (r,g,b) = Cairo.setSourceRGB r g b
