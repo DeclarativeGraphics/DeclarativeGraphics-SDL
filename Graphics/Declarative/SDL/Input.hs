@@ -8,7 +8,10 @@ module Graphics.Declarative.SDL.Input
     fromSDLEvent,
     fromSDLEventPayload,
     fromSDLKeyEvent,
-    mouseInputPos
+    mouseInputPos,
+    waitEventTimeout,
+    ticks,
+    TimeInMs
   ) where
 
 import Graphics.Declarative.SDL.Keys
