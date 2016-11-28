@@ -27,7 +27,6 @@ data Input
   | MouseInput MouseInput
   | TextInput String
   | Resize (Int, Int)
-  | Tick
   deriving (Show, Eq)
 
 data MouseInput = MouseMove (Double, Double)
@@ -40,6 +39,16 @@ data MB = MBLeft | MBMiddle | MBRight | MBX1 | MBX2 | MBExtra Int deriving (Show
 data KeyInput = KeyPress Key
               | KeyRelease Key
               deriving (Show, Eq)
+
+type TimeInMs = Word32
+
+waitEventTimeout :: TimeInMs -> IO (Maybe Input)
+waitEventTimeout timeout =
+  event <- SDL.waitEventTimeout (fromIntegral timeout)
+  return (fmap fromSDLEvent event)
+
+ticks :: IO TimeInMs
+ticks = SDL.ticks
 
 fromSDLEvent :: SDL.Event -> Maybe Input
 fromSDLEvent = fromSDLEventPayload . SDL.eventPayload
