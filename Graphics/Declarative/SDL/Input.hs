@@ -21,7 +21,7 @@ import Data.Word
 import Control.Applicative ((<$>))
 import qualified SDL
 import Linear
-import Linear.Affine
+import Linear.Affine (Point(P))
 import Debug.Trace
 import Data.Text
 
@@ -32,9 +32,9 @@ data Input
   | Resize (Int, Int)
   deriving (Show, Eq)
 
-data MouseInput = MouseMove (Double, Double)
-                | MousePress (Double, Double) MB
-                | MouseRelease (Double, Double) MB
+data MouseInput = MouseMove (V2 Double)
+                | MousePress (V2 Double) MB
+                | MouseRelease (V2 Double) MB
                 deriving (Show, Eq, Read)
 
 data MB = MBLeft | MBMiddle | MBRight | MBX1 | MBX2 | MBExtra Int deriving (Show, Eq, Read)
@@ -58,7 +58,7 @@ fromSDLEvent = fromSDLEventPayload . SDL.eventPayload
 
 fromSDLEventPayload :: SDL.EventPayload -> Maybe Input
 fromSDLEventPayload (SDL.KeyboardEvent ev)    = KeyInput <$> fromSDLKeyEvent (SDL.keyboardEventKeyMotion ev) (SDL.keyboardEventKeysym ev)
-fromSDLEventPayload (SDL.MouseMotionEvent ev) = Just $ MouseInput $ MouseMove (fromIntegral x, fromIntegral y) where (P (V2 x y)) = SDL.mouseMotionEventPos ev
+fromSDLEventPayload (SDL.MouseMotionEvent ev) = Just $ MouseInput $ MouseMove $ V2 (fromIntegral x) (fromIntegral y) where (P (V2 x y)) = SDL.mouseMotionEventPos ev
 fromSDLEventPayload (SDL.MouseButtonEvent ev) = Just $ MouseInput $ fromSDLMouseButtonEvent ev
 fromSDLEventPayload (SDL.WindowResizedEvent ev) = Just $ Resize (fromIntegral w, fromIntegral h) where (V2 w h) = SDL.windowResizedEventSize ev
 fromSDLEventPayload (SDL.TextInputEvent ev) = Just $ TextInput $ unpack $ SDL.textInputEventText ev
@@ -72,8 +72,8 @@ fromSDLKeyEvent typ sym = case typ of
 
 fromSDLMouseButtonEvent :: SDL.MouseButtonEventData -> MouseInput
 fromSDLMouseButtonEvent ev = case SDL.mouseButtonEventMotion ev of
-    SDL.Pressed  -> MousePress (fromIntegral x, fromIntegral y) $ translateMB $ SDL.mouseButtonEventButton ev
-    SDL.Released -> MouseRelease (fromIntegral x, fromIntegral y) $ translateMB $ SDL.mouseButtonEventButton ev
+    SDL.Pressed  -> MousePress (V2 (fromIntegral x) (fromIntegral y)) $ translateMB $ SDL.mouseButtonEventButton ev
+    SDL.Released -> MouseRelease (V2 (fromIntegral x) (fromIntegral y)) $ translateMB $ SDL.mouseButtonEventButton ev
   where (P (V2 x y)) = SDL.mouseButtonEventPos ev
 
 translateMB :: SDL.MouseButton -> MB
@@ -84,7 +84,7 @@ translateMB SDL.ButtonX1 = MBX1
 translateMB SDL.ButtonX2 = MBX2
 translateMB (SDL.ButtonExtra i) = MBExtra i
 
-mouseInputPos :: Lens MouseInput MouseInput (Double, Double) (Double, Double)
+mouseInputPos :: Lens MouseInput MouseInput (V2 Double) (V2 Double)
 mouseInputPos = Lens
   { get = getPos
   , modify = modifyPos }
