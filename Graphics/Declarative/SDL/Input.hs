@@ -30,6 +30,7 @@ data Input
   | MouseInput MouseInput
   | TextInput String
   | Resize (Int, Int)
+  | QuitEvent
   deriving (Show, Eq)
 
 data MouseInput = MouseMove (V2 Double)
@@ -57,6 +58,7 @@ fromSDLEvent :: SDL.Event -> Maybe Input
 fromSDLEvent = fromSDLEventPayload . SDL.eventPayload
 
 fromSDLEventPayload :: SDL.EventPayload -> Maybe Input
+fromSDLEventPayload SDL.QuitEvent             = Just QuitEvent
 fromSDLEventPayload (SDL.KeyboardEvent ev)    = KeyInput <$> fromSDLKeyEvent (SDL.keyboardEventKeyMotion ev) (SDL.keyboardEventKeysym ev)
 fromSDLEventPayload (SDL.MouseMotionEvent ev) = Just $ MouseInput $ MouseMove $ V2 (fromIntegral x) (fromIntegral y) where (P (V2 x y)) = SDL.mouseMotionEventPos ev
 fromSDLEventPayload (SDL.MouseButtonEvent ev) = Just $ MouseInput $ fromSDLMouseButtonEvent ev
