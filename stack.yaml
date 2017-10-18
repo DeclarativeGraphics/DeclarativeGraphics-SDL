@@ -7,4 +7,4 @@ packages:
     git: https://github.com/matheus23/OneFileLens.git
     commit: 9a07bcd6c921febfeb503109a646695e7d62c37a
 extra-deps: []
-resolver: lts-7.9
+resolver: lts-9.6
