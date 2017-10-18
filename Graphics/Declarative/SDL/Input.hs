@@ -15,6 +15,7 @@ module Graphics.Declarative.SDL.Input
   ) where
 
 import Graphics.Declarative.SDL.Keys
+import Graphics.Declarative.Classes
 
 import Data.Lens
 import Data.Word
@@ -45,6 +46,17 @@ data KeyInput = KeyPress Key
               deriving (Show, Eq)
 
 type TimeInMs = Word32
+
+instance Transformable Input where
+    transformBy matrix (MouseInput mi) = MouseInput (transformBy matrix mi)
+    transformBy _ anythingElse = anythingElse
+
+instance Transformable MouseInput where
+    transformBy matrix = modify mouseInputPos changePos
+        where
+            changePos (V2 x y) =
+                let (V3 x' y' w) = matrix !* V3 x y 1
+                 in V2 (x' / w) (y' / w)
 
 waitEventTimeout :: TimeInMs -> IO (Maybe Input)
 waitEventTimeout timeout = do
