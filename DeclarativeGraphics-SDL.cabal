@@ -20,7 +20,7 @@ library
                        Graphics.Declarative.SDL.Glue
   -- other-modules:
   -- other-extensions:
-  build-depends:       base, sdl2, cairo, cpu, containers, text, OneFileLens, linear,
+  build-depends:       base, sdl2, cairo, cpu, containers, text, lens, linear,
                        DeclarativeGraphics, DeclarativeGraphics-Cairo
   -- hs-source-dirs:
   default-language:    Haskell2010

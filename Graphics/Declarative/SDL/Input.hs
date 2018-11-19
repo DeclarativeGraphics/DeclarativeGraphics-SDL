@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE LambdaCase #-}
 module Graphics.Declarative.SDL.Input
   ( module Graphics.Declarative.SDL.Keys,
     Input (..),
@@ -17,7 +18,7 @@ module Graphics.Declarative.SDL.Input
 import Graphics.Declarative.SDL.Keys
 import Graphics.Declarative.Classes
 
-import Data.Lens
+import Control.Lens
 import Data.Word
 import Control.Applicative ((<$>))
 import qualified SDL
@@ -52,7 +53,7 @@ instance Transformable Input where
     transformBy _ anythingElse = anythingElse
 
 instance Transformable MouseInput where
-    transformBy matrix = modify mouseInputPos changePos
+    transformBy matrix = over mouseInputPos changePos
         where
             changePos (V2 x y) =
                 let (V3 x' y' w) = matrix !* V3 x y 1
@@ -98,14 +99,8 @@ translateMB SDL.ButtonX1 = MBX1
 translateMB SDL.ButtonX2 = MBX2
 translateMB (SDL.ButtonExtra i) = MBExtra i
 
-mouseInputPos :: Lens MouseInput MouseInput (V2 Double) (V2 Double)
-mouseInputPos = Lens
-  { get = getPos
-  , modify = modifyPos }
-  where
-    getPos (MouseMove pos) = pos
-    getPos (MousePress pos _) = pos
-    getPos (MouseRelease pos _) = pos
-    modifyPos f (MouseMove pos) = MouseMove (f pos)
-    modifyPos f (MousePress pos b) = MousePress (f pos) b
-    modifyPos f (MouseRelease pos b) = MouseRelease (f pos) b
+mouseInputPos :: Lens' MouseInput (V2 Double)
+mouseInputPos f =  \case
+  MouseMove pos -> MouseMove <$> f pos
+  MousePress pos button -> (`MousePress` button) <$> f pos
+  MouseRelease pos button -> (`MouseRelease` button) <$> f pos

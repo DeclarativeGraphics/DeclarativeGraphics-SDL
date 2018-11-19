@@ -1,10 +1,7 @@
 flags: {}
 packages:
-- '.'
-- '../DeclarativeGraphics'
-- '../DeclarativeGraphics-Cairo'
-- location:
-    git: https://github.com/matheus23/OneFileLens.git
-    commit: 9a07bcd6c921febfeb503109a646695e7d62c37a
+- .
+- ../DeclarativeGraphics
+- ../DeclarativeGraphics-Cairo
 extra-deps: []
-resolver: lts-9.6
+resolver: lts-12.19
