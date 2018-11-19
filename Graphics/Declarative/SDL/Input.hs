@@ -16,7 +16,7 @@ module Graphics.Declarative.SDL.Input
   ) where
 
 import Graphics.Declarative.SDL.Keys
-import Graphics.Declarative.Classes
+import Graphics.Declarative.Transforms
 
 import Control.Lens
 import Data.Word
