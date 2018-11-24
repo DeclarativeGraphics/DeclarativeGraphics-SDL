@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Graphics.Declarative.SDL.Glue where
 
 import qualified Graphics.Rendering.Cairo as Cairo
@@ -13,37 +14,30 @@ import Foreign.C.Types
 import Foreign.Ptr
 import Foreign.Storable
 import System.Endian
+import Control.Exception
 
 
 runSDL :: IO () -> IO ()
-runSDL program = do
-    SDL.initialize [SDL.InitVideo]
-    program
-    SDL.quit
+runSDL = bracket_ (SDL.initialize [SDL.InitVideo]) SDL.quit
 
 withWindow :: String -> SDL.WindowConfig -> (SDL.Window -> IO ()) -> IO ()
-withWindow title config func = do
-    window <- SDL.createWindow (pack title) config
-    func window
-    SDL.destroyWindow window
+withWindow title config =
+    bracket (SDL.createWindow (pack title) config) SDL.destroyWindow
 
 withRenderer :: SDL.RendererConfig -> SDL.Window -> (SDL.Renderer -> IO ()) -> IO ()
-withRenderer rendererConf window func = do
-    renderer <- SDL.createRenderer window (-1) rendererConf
-    func renderer
-    SDL.destroyRenderer renderer
+withRenderer rendererConf window =
+    bracket (SDL.createRenderer window (-1) rendererConf) SDL.destroyRenderer
 
 withTexture :: SDL.Renderer -> V2 CInt -> (SDL.Texture -> IO ()) -> IO ()
-withTexture rend size action = do
-    texture <- SDL.createTexture rend SDL.ARGB8888 SDL.TextureAccessStreaming size
-    action texture
-    SDL.destroyTexture texture
+withTexture rend size =
+    bracket (SDL.createTexture rend SDL.ARGB8888 SDL.TextureAccessStreaming size) SDL.destroyTexture
 
 withPixelsFromTexture :: SDL.Texture -> (Int -> Ptr () -> IO ()) -> IO ()
-withPixelsFromTexture texture renderer = do
-      (pixels, pitch) <- SDL.lockTexture texture Nothing
-      renderer (fromIntegral pitch) pixels
-      SDL.unlockTexture texture
+withPixelsFromTexture texture renderer =
+    bracket
+       (SDL.lockTexture texture Nothing)
+       (\_ -> SDL.unlockTexture texture)
+       (\(pixels, pitch) -> renderer (fromIntegral pitch) pixels)
 
 -- RENDERING
 
